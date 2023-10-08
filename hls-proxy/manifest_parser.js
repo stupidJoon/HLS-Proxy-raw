@@ -331,9 +331,11 @@ const finalize_embedded_url = function(embedded_url, vod_start_at_ms, debug) {
 }
 
 const encode_embedded_url = function(embedded_url, redirected_base_url, debug) {
-  embedded_url.encoded_url = (embedded_url.unencoded_url)
-    ? `${redirected_base_url}/${ utils.base64_encode(embedded_url.unencoded_url) }.${embedded_url.url_type || 'other'}`
-    : ''
+  // disable base64 encode and adding file extension(like .m3u8)
+  // embedded_url.encoded_url = (embedded_url.unencoded_url)
+  //   ? `${redirected_base_url}/${ utils.base64_encode(embedded_url.unencoded_url) }.${embedded_url.url_type || 'other'}`
+  //   : ''
+  embedded_url.encoded_url = (embedded_url.unencoded_url) ? `${redirected_base_url}/${embedded_url.unencoded_url}` : ''
 
   if (embedded_url.encoded_url)
     debug(3, 'redirecting (proxied):', embedded_url.encoded_url)

@@ -21,7 +21,9 @@ const parse_req_url = function(params, req) {
 
   const result = {redirected_base_url: '', url_type: '', url: '', referer_url: ''}
 
-  const matches = regexs.req_url.exec( expressjs.get_proxy_req_url(req) )
+  // modify for allowing not encoded urls
+  // const matches = regexs.req_url.exec( expressjs.get_proxy_req_url(req) )
+  const matches = [expressjs.get_proxy_req_url(req), '', expressjs.get_proxy_req_url(req).slice(1)]
 
   if (matches) {
     result.redirected_base_url = `${ is_secure ? 'https' : 'http' }://${host || req.headers.host}${expressjs.get_base_req_url(req) || matches[1] || ''}`
@@ -31,7 +33,15 @@ const parse_req_url = function(params, req) {
 
     let url, url_lc, index
 
-    url    = base64_decode( decodeURIComponent( matches[2] ) ).trim()
+    // remove base64 encode
+    // url    = base64_decode( decodeURIComponent( matches[2] ) ).trim()
+    url = matches[2]
+
+    // if url is m3u8, url_type is m3u8(replace if(matches[3]) condition)
+    const filename = url.match(/\.(\w{2,4})(?:$|\?)/)
+    if (filename && filename[1])
+      result.url_type = filename[1]
+
     url_lc = url.toLowerCase()
     index  = url_lc.indexOf('http')
 
