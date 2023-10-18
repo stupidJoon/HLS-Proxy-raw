@@ -169,6 +169,22 @@ const extract_embedded_urls = function(m3u8_lines, m3u8_url, referer_url, meta_d
       if (meta_data !== null)
         extract_meta_data(meta_data, m3u8_line, matching_landmark)
 
+      // Add #EXT-X-TWITCH-PREFETCH to embedded_urls
+      if (matching_landmark === '#EXT-X-TWITCH-PREFETCH:') {
+        embedded_urls.push({
+          line_index:         i,
+          url_indices:        null,
+          url_type:           'ts',
+          original_match_url: m3u8_line,
+          resolved_match_url: m3u8_line.split(':').slice(1).join(':'),
+          redirected_url:     null,
+          referer_url:        referer_url,
+          encoded_url:        null,
+          is_twitch_prefetch: true
+        })
+        continue
+      }
+
       matches = regexs.m3u8_line_url.exec(m3u8_line)
       if (!matches) continue
       matching_url = matches[1]
@@ -357,6 +373,9 @@ const modify_m3u8_line = function(embedded_url, m3u8_lines) {
     const m3u8_line = m3u8_lines[line_index]
 
     m3u8_lines[line_index] = m3u8_line.substring(0, url_indices[0]) + encoded_url + m3u8_line.substring(url_indices[1])
+  }
+  else if (embedded_url.is_twitch_prefetch) {
+    m3u8_lines[line_index] = '#EXT-X-TWITCH-PREFETCH:' + encoded_url
   }
   else {
     m3u8_lines[line_index] = encoded_url
